@@ -1,0 +1,36 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import r2_score, mean_absolute_error
+from joblib import dump
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("D:/desktop/training model/training_datasets.csv")
+
+X = df.iloc[:, :-2]
+y_udi = df["UDI"]
+y_pmv = df["PMV"]
+
+#udi model
+X_train, X_test, y_train, y_test = train_test_split(X, y_udi, test_size=0.2, random_state=0)
+
+model_udi = RandomForestRegressor(n_estimators=300, random_state=0)
+model_udi.fit(X_train, y_train)
+
+pred = model_udi.predict(X_test)
+print("R²:", r2_score(y_test, pred), "MAE:", mean_absolute_error(y_test, pred))
+
+dump(model_udi, "D:/desktop/training model/udi_model.joblib")
+
+#pmv model
+X_train, X_test, y_train, y_test = train_test_split(X, y_pmv, test_size=0.2, random_state=0)
+model_pmv = RandomForestRegressor(n_estimators=300, random_state=0)
+model_pmv.fit(X_train, y_train)
+pred = model_pmv.predict(X_test)
+
+print("PMV Model")
+print("R²:", r2_score(y_test, pred))
+print("MAE:", mean_absolute_error(y_test, pred))
+
+#output joblib
+dump(model_pmv, "D:/desktop/training model/pmv_model.joblib")
