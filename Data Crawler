@@ -1,0 +1,72 @@
+import os
+import time
+import random
+import requests
+from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
+
+SAVE_DIR = "propertyguru_floorplans"
+BASE_URL = "https://www.propertyguru.com.sg/property-for-sale?page="
+START_PAGE = 1
+END_PAGE = 10   
+
+os.makedirs(SAVE_DIR, exist_ok=True)
+ua = UserAgent()
+
+
+def download_floor_plan(listing_url, listing_id):
+    headers = {"User-Agent": ua.random}
+
+    try:
+        r = requests.get(listing_url, headers=headers, timeout=15)
+        if r.status_code != 200:
+            return False
+
+        soup = BeautifulSoup(r.text, "lxml")
+
+        # Look for floor plan <img> element
+        fp_img = soup.find("img", {"alt": "Floor Plan"})
+        if not fp_img:
+            return False
+
+        img_url = fp_img.get("src")
+        if not img_url:
+            return False
+
+        # Download the image
+        img_data = requests.get(img_url, headers=headers).content
+        save_path = os.path.join(SAVE_DIR, f"{listing_id}.jpg")
+
+        with open(save_path, "wb") as f:
+            f.write(img_data)
+
+        print(f" Saved: {save_path}")
+        return True
+
+    except Exception as e:
+        print(f"Error downloading {listing_url}: {str(e)}")
+        return False
+
+
+for page in range(START_PAGE, END_PAGE + 1):
+    print(f"\n=== Crawling listing page {page} ===")
+    headers = {"User-Agent": ua.random}
+
+    r = requests.get(BASE_URL + str(page), headers=headers)
+    soup = BeautifulSoup(r.text, "lxml")
+
+    # Listing links
+    listings = soup.find_all("a", {"data-testid": "listing-card-link"})
+
+    for a in listings:
+        listing_url = "https://www.propertyguru.com.sg" + a.get("href")
+        listing_id = listing_url.split("-")[-1]  
+
+        print(f"→ Listing: {listing_id}")
+
+        download_floor_plan(listing_url, listing_id)
+
+        # Random delay to avoid being blocked
+        time.sleep(random.uniform(1.5, 3.5))
+
+    time.sleep(random.uniform(3, 6))
