@@ -1,0 +1,73 @@
+#PMV
+import warnings
+warnings.filterwarnings("ignore")
+
+import rhinoscriptsyntax as rs
+import scriptcontext as sc
+import System
+import clr
+import os
+import joblib
+import math
+
+clr.AddReference("System.Core")
+clr.AddReference("System.IO")
+
+x_mm = float(X_mm)
+y_mm = float(Y_mm)
+orientation = float(Orientation)
+wwr = float(WWR)
+sill_height = float(SillHeight)
+
+model_path = r"C:\Users\xu hongchang\Desktop\code\trainingmodel\pmv_model.joblib"
+
+import numpy as np
+import numpy as np
+
+X_new = np.array([[X_mm, Y_mm, Orientation, WWR, SillHeight]])
+
+model = joblib.load(model_path)
+
+pmv_pred = model.predict(X_new)[0]
+
+PMV = float(pmv_pred)
+print(PMV)
+
+#UDI
+import warnings
+warnings.filterwarnings("ignore")
+
+import rhinoscriptsyntax as rs
+import scriptcontext as sc
+import System
+import clr
+import os
+import joblib
+import math
+
+clr.AddReference("System.Core")
+clr.AddReference("System.IO")
+
+# 定义输入参数
+x_mm = float(X_mm)
+y_mm = float(Y_mm)
+orientation = float(Orientation)
+wwr = float(WWR)
+sill_height = float(SillHeight)
+
+# 模型文件路径 - 需要修改为实际路径
+model_path = r"C:\Users\xu hongchang\Desktop\code\trainingmodel\udi_model.joblib"
+
+import numpy as np
+
+# 举例预测一条新样本
+X_new = np.array([[X_mm, Y_mm, Orientation, WWR, SillHeight]])
+# 加载模型
+model = joblib.load(model_path)
+
+# 使用模型预测
+pmv_pred = model.predict(X_new)[0]
+
+# 输出结果给 Grasshopper
+UDI = float(pmv_pred)
+print(UDI)
